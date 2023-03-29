@@ -89,7 +89,7 @@ export const addCourseLecture = catchAsyncError(async (req, res, next) => {
   });
 });
 
-// Delete lecture
+// Delete course
 export const deleteCourse = catchAsyncError(async (req, res, next) => {
   const { id } = req.params;
 
@@ -113,6 +113,7 @@ export const deleteCourse = catchAsyncError(async (req, res, next) => {
   });
 });
 
+// delete lecture
 export const deleteLecture = catchAsyncError(async (req, res, next) => {
   const { courseId, lectureId } = req.query;
 
