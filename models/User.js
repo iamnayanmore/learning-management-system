@@ -2,6 +2,7 @@ import mongoose, { Schema } from "mongoose";
 import validator from "validator";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 
 const schema = new mongoose.Schema(
   {
@@ -69,13 +70,26 @@ schema.pre("save", async function (next) {
 });
 
 schema.methods.getJWTToken = function () {
-  return jwt.sign({ _id: this._id, role: this.role }, process.env.JWT_SECRET, {
+  return jwt.sign({ _id: this._id }, process.env.JWT_SECRET, {
     expiresIn: "15d",
   });
 };
 
 schema.methods.comparePassword = async function (password) {
   return await bcrypt.compare(password, this.password);
+};
+
+schema.methods.getResetToken = async function () {
+  const resetToken = crypto.randomBytes(20).toString("hex");
+
+  this.resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  this.resetPasswordExpire = Date.now() + 50 * 60 * 1000;
+
+  return resetToken;
 };
 
 export const User = mongoose.model("User", schema);

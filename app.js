@@ -1,6 +1,7 @@
 import express from "express";
 import { config } from "dotenv";
 import ErrorMiddleware from "./middlewares/Error.js";
+import cookieParser from "cookie-parser";
 
 config({ path: "./config/config.env" });
 const app = express();
@@ -8,6 +9,7 @@ const app = express();
 // importing middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Importing and use routes
 import user from "./routes/userRoute.js";
