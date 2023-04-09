@@ -1,5 +1,6 @@
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import { User } from "../models/User.js";
+import { Stats } from "../models/Stats.js";
 import ErrorHandler from "../utils/errorHandle.js";
 import { sendEmail } from "../utils/sendEmail.js";
 import { sendToken } from "../utils/sendToken.js";
@@ -299,4 +300,20 @@ export const deleteMyProfile = catchAsyncError(async (req, res, next) => {
       success: true,
       message: "Profile deleted successfully.",
     });
+});
+
+// Real time data update
+User.watch().on("change", async () => {
+  try {
+    let stats = await Stats.findOne().sort({ createdAt: -1 });
+
+    const subscription = await User.find({ "subscription.status": "active" });
+
+    stats.users = await User.countDocuments();
+    stats.subscriptions = subscription.length;
+
+    await stats.save();
+  } catch (error) {
+    console.log(error);
+  }
 });

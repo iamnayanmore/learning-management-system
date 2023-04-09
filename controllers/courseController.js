@@ -1,11 +1,23 @@
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import { Course } from "../models/course.js";
+import { Stats } from "../models/Stats.js";
 import getDataUri from "../utils/dataUri.js";
 import ErrorHandler from "../utils/errorHandle.js";
 import cloudinary from "cloudinary";
 
 export const getAllCourses = catchAsyncError(async (req, res, next) => {
-  const courses = await Course.find().select("-lectures");
+  const { keyword = "", category = "" } = req.query;
+
+  const courses = await Course.find({
+    title: {
+      $regex: keyword,
+      $options: "i",
+    },
+    category: {
+      $regex: category,
+      $options: "i",
+    },
+  }).select("-lectures");
   res.status(200).json({
     success: true,
     courses,
@@ -139,4 +151,23 @@ export const deleteLecture = catchAsyncError(async (req, res, next) => {
     success: true,
     message: "Lecture deleted successfully",
   });
+});
+
+// Real time data update
+Course.watch().on("change", async () => {
+  try {
+    let stats = await Stats.findOne().sort({ createdAt: -1 });
+
+    const courses = await Course.find();
+
+    let totalViews = 0;
+
+    for (let i = 0; i < courses.length; i++) {
+      totalViews += courses[i].views;
+    }
+    stats.views = totalViews;
+    await stats.save();
+  } catch (error) {
+    console.log(error);
+  }
 });

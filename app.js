@@ -15,10 +15,12 @@ app.use(cookieParser());
 import user from "./routes/userRoute.js";
 import course from "./routes/courseRoute.js";
 import payment from "./routes/paymentRoute.js";
+import other from "./routes/otherRoute.js";
 
 app.use("/api/v1", user);
 app.use("/api/v1", course);
 app.use("/api/v1", payment);
+app.use("/api/v1", other);
 
 export default app;
 app.use(ErrorMiddleware);
